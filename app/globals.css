@@ -1,0 +1,134 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@keyframes auth-bubble {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  20% {
+    transform: translate3d(
+        calc(var(--move-x) * 0.35),
+        calc(var(--move-y) * -0.2),
+        0
+      )
+      scale(1.08);
+  }
+
+  40% {
+    transform: translate3d(
+        calc(var(--move-x) * -0.45),
+        calc(var(--move-y) * 0.4),
+        0
+      )
+      scale(0.94);
+  }
+
+  60% {
+    transform: translate3d(
+        calc(var(--move-x) * 0.65),
+        calc(var(--move-y) * -0.5),
+        0
+      )
+      scale(1.1);
+  }
+
+  80% {
+    transform: translate3d(
+        calc(var(--move-x) * -0.35),
+        calc(var(--move-y) * 0.7),
+        0
+      )
+      scale(0.96);
+  }
+
+  100% {
+    transform: translate3d(var(--move-x), var(--move-y), 0) scale(1);
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: block;
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d4d4d8;
+  border-radius: 9999px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #3f3f46;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #a1a1aa;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #52525b;
+}
+
+/* app/globals.css */
+@keyframes slide-in-bottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-top {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-bottom {
+  animation: slide-in-bottom 0.25s ease-out;
+}
+.animate-slide-in-top {
+  animation: slide-in-top 0.25s ease-out;
+}
+.animate-slide-in-left {
+  animation: slide-in-left 0.25s ease-out;
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.25s ease-out;
+}
