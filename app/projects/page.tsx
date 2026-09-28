@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/Button";
 import DropdownMenu from "@/components/ui/DropdownMenu";
 import IconButtonGroup from "@/components/ui/IconButtonGroup";
-import { ChevronDown, FolderOpen, LayoutGrid, List, Plus, Search } from "lucide-react";
+import { ChevronDown, FolderOpen, LayoutGrid, List, Plus, Search, MoreHorizontal } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CreateProjectModal from "@/components/global/CreateProjectModal";
 import EmptyState from "@/components/ui/EmptyState";
@@ -11,6 +11,13 @@ import { createClient } from "@/utils/supabase/client";
 import { Project } from "@/utils/types";
 import { Spinner } from "@/components/ui/Spinner";
 import { mapProjectRow } from "@/lib/utils";
+
+const STATUS_STYLES: Record<string, string> = {
+  draft: "bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400",
+  running: "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400",
+  completed: "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
+  archived: "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400",
+};
 
 export default function page() {
   const [status, setStatus] = useState<string | null>(null);
@@ -183,54 +190,107 @@ export default function page() {
               {filteredProjects.map((project) => (
                 <div
                   key={project.id}
-                  className={`flex flex-col gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors duration-150 cursor-pointer ${project.pending ? "opacity-60" : ""
+                  className={`flex flex-col gap-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150 cursor-pointer ${project.pending ? "opacity-60" : ""
                     }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate flex items-center gap-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate flex items-center gap-2 min-w-0">
                       {project.pending && (
                         <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse shrink-0" />
                       )}
-                      {project.name}
+                      <span className="truncate">{project.name}</span>
                     </h3>
-                    <span className="text-xs font-medium text-zinc-500 capitalize shrink-0 ml-2">
-                      {project.metadata?.status}
-                    </span>
+                    <button className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-150 cursor-pointer shrink-0">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
                   </div>
                   {project.description && (
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
+                    <p className="text-xs font-medium text-zinc-900 dark:text-zinc-50 line-clamp-2">
                       {project.description}
                     </p>
                   )}
+                  <div className="flex items-center justify-between mt-1">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium capitalize ${STATUS_STYLES[project.metadata?.status ?? ""]
+                        }`}
+                    >
+                      {project.metadata?.status}
+                    </span>
+                    <span className="text-xs font-medium text-zinc-900 dark:text-zinc-50">
+                      {project.createdAt
+                        ? new Date(project.createdAt).toLocaleDateString()
+                        : "—"}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
-              {filteredProjects.map((project) => (
-                <div
-                  key={project.id}
-                  className={`flex items-center justify-between gap-3 px-4 py-3 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors duration-150 cursor-pointer ${project.pending ? "opacity-60" : ""
-                    }`}
-                >
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate flex items-center gap-2">
-                      {project.pending && (
-                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse shrink-0" />
-                      )}
-                      {project.name}
-                    </h3>
-                    {project.description && (
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
-                        {project.description}
-                      </p>
-                    )}
-                  </div>
-                  <span className="text-xs font-medium text-zinc-500 capitalize shrink-0">
-                    {project.metadata?.status}
-                  </span>
-                </div>
-              ))}
+            <div className="w-full overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-700">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700">
+                    <th className="text-left px-4 py-3 text-xs font-semibold font-mono uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                      Project
+                    </th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold font-mono uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                      Description
+                    </th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold font-mono uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                      Status
+                    </th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold font-mono uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                      Created
+                    </th>
+                    <th className="w-10 px-4 py-3 bg-zinc-50 dark:bg-zinc-800"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredProjects.map((project) => (
+                    <tr
+                      key={project.id}
+                      className={`bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 last:border-b-0 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150 ${project.pending ? "opacity-60" : ""
+                        }`}
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {project.pending && (
+                            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse shrink-0" />
+                          )}
+                          <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate">
+                            {project.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 max-w-64">
+                        <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate block">
+                          {project.description || "—"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium capitalize ${STATUS_STYLES[project.metadata?.status ?? ""]
+                            }`}
+                        >
+                          {project.metadata?.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs font-medium text-zinc-900 dark:text-zinc-50">
+                        {project.createdAt
+                          ? new Date(project.createdAt).toLocaleDateString()
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button
+                          icon={MoreHorizontal}
+                          variant="outline"
+                          size="sm"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -245,63 +305,3 @@ export default function page() {
     </div>
   );
 }
-
-
-// ) : view === "grid" ? (
-//             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-//               {filteredProjects.map((project) => (
-//                 <div
-//                   key={project.id}
-//                   className={`flex flex-col gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors duration-150 cursor-pointer ${project.pending ? "opacity-60" : ""
-//                     }`}
-//                 >
-//                   <div className="flex items-center justify-between">
-//                     <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate flex items-center gap-2">
-//                       {project.pending && (
-//                         <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse shrink-0" />
-//                       )}
-//                       {project.name}
-//                     </h3>
-//                     <span className="text-xs font-medium text-zinc-500 capitalize shrink-0 ml-2">
-//                       {project.metadata?.status}
-//                     </span>
-//                   </div>
-//                   {project.description && (
-//                     <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2">
-//                       {project.description}
-//                     </p>
-//                   )}
-//                 </div>
-//               ))}
-//             </div>
-//           ) : (
-//             <div className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
-//               {filteredProjects.map((project) => (
-//                 <div
-//                   key={project.id}
-//                   className={`flex items-center justify-between gap-3 px-4 py-3 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors duration-150 cursor-pointer ${project.pending ? "opacity-60" : ""
-//                     }`}
-//                 >
-//                   <div className="flex flex-col gap-0.5 min-w-0">
-//                     <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate flex items-center gap-2">
-//                       {project.pending && (
-//                         <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse shrink-0" />
-//                       )}
-//                       {project.name}
-//                     </h3>
-//                     {project.description && (
-//                       <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
-//                         {project.description}
-//                       </p>
-//                     )}
-//                   </div>
-//                   <span className="text-xs font-medium text-zinc-500 capitalize shrink-0">
-//                     {project.metadata?.status}
-//                   </span>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-// akhon project display ui change korte hobe, aita akdom just akta basic hoise.
-
-// List view a table er moto hobe, column and row hisebe. thead er tr er moddhe th gulo hobe, PROJECT, DESCRIPTION, STATUS, CREATED, and aro akta extra item thakbe seta hobe more tobe more er jonno shudhu prottekta row er seshe icon button thakbe sekhane akta menu hobe (more menu ta amra pore desingn korbo) th gula uppercase hobe and font-mono hobe.  

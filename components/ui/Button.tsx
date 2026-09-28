@@ -45,8 +45,8 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends
-    Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "title">,
-    Omit<VariantProps<typeof buttonVariants>, "iconOnly"> {
+  Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "title">,
+  Omit<VariantProps<typeof buttonVariants>, "iconOnly"> {
   title?: string;
   icon?: IconType;
   iconPosition?: "left" | "right";
