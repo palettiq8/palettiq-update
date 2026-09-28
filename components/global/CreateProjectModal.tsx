@@ -12,12 +12,19 @@ import {
   ProjectPermission,
   ProjectVisibility,
   ProjectStatus,
+  Project,
 } from "@/utils/types";
 import { toast } from "@/lib/toast";
+import { useAuthStore } from "@/store/useAuthStore";
+import { mapProjectRow } from "@/lib/utils";
+import { PROJECT_DESCRIPTION_MAX_LENGTH, PROJECT_NAME_MAX_LENGTH } from "@/utils/constants";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOptimisticCreate: (tempProject: Project) => void;
+  onCreateSuccess: (tempId: string, project: Project) => void;
+  onCreateError: (tempId: string) => void;
 }
 
 type SearchUser = {
@@ -62,14 +69,16 @@ const STATUS_OPTIONS: { value: ProjectStatus; label: string }[] = [
 export default function CreateProjectModal({
   isOpen,
   onClose,
+  onOptimisticCreate,
+  onCreateSuccess,
+  onCreateError
 }: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState("");
   const [projectNameError, setProjectNameError] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
   const [visibility, setVisibility] = useState<ProjectVisibility>("public");
   const [status, setStatus] = useState<ProjectStatus>("running");
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const [industry, setIndustry] = useState("");
   const [isIndustryOpen, setIsIndustryOpen] = useState(false);
@@ -80,6 +89,7 @@ export default function CreateProjectModal({
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const supabase = useMemo(() => createClient(), []);
+  const { user } = useAuthStore();
 
   const [inviteQuery, setInviteQuery] = useState("");
   const [isInviteOpen, setIsInviteOpen] = useState(false);
@@ -97,8 +107,8 @@ export default function CreateProjectModal({
     industry.trim() === "" || isOtherSelected
       ? INDUSTRY_OPTIONS
       : INDUSTRY_OPTIONS.filter((item) =>
-          item.toLowerCase().includes(industry.toLowerCase()),
-        );
+        item.toLowerCase().includes(industry.toLowerCase()),
+      );
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -290,6 +300,7 @@ export default function CreateProjectModal({
     setProjectName("");
     setProjectNameError("");
     setProjectDescription("");
+    setDescriptionError("");
     setVisibility("public");
     setStatus("running");
     setIndustry("");
@@ -304,9 +315,10 @@ export default function CreateProjectModal({
   };
 
   const createProjectHandler = async () => {
-    setIsLoading(true);
-
-    const project = {
+    const tempId = crypto.randomUUID();
+    const optimisticProject: Project = {
+      id: tempId,
+      adminId: user?.id ?? "",
       name: projectName,
       slug: projectName.split(" ").join("-").toLowerCase(),
       description: projectDescription,
@@ -316,24 +328,34 @@ export default function CreateProjectModal({
         visibility,
         thumbnailUrl: "",
       },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      pending: true,
     };
 
-    try {
-      const { error } = await supabase.from("projects").insert(project);
+    onOptimisticCreate(optimisticProject);
+    resetForm();
+    onClose();
 
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
+    const { data, error } = await supabase
+      .from("projects")
+      .insert({
+        name: optimisticProject.name,
+        slug: optimisticProject.slug,
+        description: optimisticProject.description,
+        metadata: optimisticProject.metadata,
+      })
+      .select()
+      .single();
 
-      toast.success("Project created successfully!", { duration: 1000000 });
-      resetForm();
-      onClose();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setIsLoading(false);
+    if (error) {
+      toast.error(error.message);
+      onCreateError(tempId);
+      return;
     }
+
+    onCreateSuccess(tempId, mapProjectRow(data));
+    toast.success("Project created successfully!");
   };
 
   return (
@@ -354,25 +376,51 @@ export default function CreateProjectModal({
           error={projectNameError}
           name="Project Name"
           onChange={(e) => {
-            setProjectName(e.target.value);
-            if (projectNameError) setProjectNameError("");
+            const value = e.target.value;
+            setProjectName(value);
+            setProjectNameError(
+              value.length > PROJECT_NAME_MAX_LENGTH
+                ? `Project name must be ${PROJECT_NAME_MAX_LENGTH} characters or less`
+                : "",
+            );
           }}
         />
         <div className="w-full flex flex-col gap-2">
           <label
-            htmlFor="Project Description"
+            htmlFor="project-description"
             className="text-sm font-medium text-gray-900 dark:text-zinc-50"
           >
             Description{" "}
             <span className="font-medium text-zinc-500">(optional)</span>
           </label>
           <textarea
+            id="project-description"
             value={projectDescription}
-            onChange={(e) => setProjectDescription(e.target.value)}
-            className="w-full min-h-30 border border-zinc-200 dark:border-zinc-700 rounded-lg p-3 text-sm font-medium text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 outline-none transition-colors duration-150 bg-white dark:bg-zinc-950 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300"
+            onChange={(e) => {
+              const value = e.target.value;
+              setProjectDescription(value);
+              setDescriptionError(
+                value.length > PROJECT_DESCRIPTION_MAX_LENGTH
+                  ? `Description must be ${PROJECT_DESCRIPTION_MAX_LENGTH} characters or less`
+                  : "",
+              );
+            }}
+            className={`w-full min-h-30 rounded-lg border p-3 text-sm font-medium text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500
+              outline-none transition-colors duration-150 bg-white dark:bg-zinc-950 custom-scrollbar
+              focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300
+              ${descriptionError ? "border-red-300 focus:ring-red-300 focus:border-red-300" : "border-zinc-200 dark:border-zinc-700"}`}
             placeholder="What is this project for?"
-            id="Project Description"
+            aria-invalid={!!descriptionError}
+            aria-describedby={descriptionError ? "project-description-error" : undefined}
           ></textarea>
+          {descriptionError && (
+            <span
+              id="project-description-error"
+              className="text-sm text-red-500"
+            >
+              {descriptionError}
+            </span>
+          )}
         </div>
 
         {/* visibility section */}
@@ -392,11 +440,10 @@ export default function CreateProjectModal({
                   key={option.value}
                   type="button"
                   onClick={() => setVisibility(option.value)}
-                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
-                    isSelected
-                      ? "bg-zinc-900 text-white shadow-sm dark:bg-zinc-50 dark:text-zinc-900"
-                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                  }`}
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer ${isSelected
+                    ? "bg-zinc-900 text-white shadow-sm dark:bg-zinc-50 dark:text-zinc-900"
+                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                    }`}
                 >
                   <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
                   {option.label}
@@ -427,11 +474,10 @@ export default function CreateProjectModal({
                   className="flex items-center gap-2 text-left cursor-pointer"
                 >
                   <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors duration-150 ${
-                      isSelected
-                        ? "bg-zinc-900 border-zinc-900 dark:bg-zinc-50 dark:border-zinc-50"
-                        : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950"
-                    }`}
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors duration-150 ${isSelected
+                      ? "bg-zinc-900 border-zinc-900 dark:bg-zinc-50 dark:border-zinc-50"
+                      : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950"
+                      }`}
                   >
                     {isSelected && (
                       <Check
@@ -500,11 +546,10 @@ export default function CreateProjectModal({
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => selectIndustry(item)}
                     onMouseEnter={() => setHighlightedIndex(index)}
-                    className={`w-full text-left rounded-md px-3 py-2 text-sm font-medium transition-colors duration-100 cursor-pointer ${
-                      index === highlightedIndex
-                        ? "bg-zinc-200/70 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                        : "text-zinc-900 dark:text-zinc-50"
-                    }`}
+                    className={`w-full text-left rounded-md px-3 py-2 text-sm font-medium transition-colors duration-100 cursor-pointer ${index === highlightedIndex
+                      ? "bg-zinc-200/70 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                      : "text-zinc-900 dark:text-zinc-50"
+                      }`}
                   >
                     {item}
                   </button>
@@ -572,11 +617,10 @@ export default function CreateProjectModal({
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => selectMember(user)}
                     onMouseEnter={() => setInviteHighlightedIndex(index)}
-                    className={`w-full flex flex-col text-left rounded-md px-3 py-2 text-sm transition-colors duration-100 cursor-pointer ${
-                      index === inviteHighlightedIndex
-                        ? "bg-zinc-200/70 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-50"
-                        : "text-zinc-700 dark:text-zinc-300"
-                    }`}
+                    className={`w-full flex flex-col text-left rounded-md px-3 py-2 text-sm transition-colors duration-100 cursor-pointer ${index === inviteHighlightedIndex
+                      ? "bg-zinc-200/70 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-50"
+                      : "text-zinc-700 dark:text-zinc-300"
+                      }`}
                   >
                     <span className="font-medium">
                       {user.name || user.username}
@@ -643,7 +687,7 @@ export default function CreateProjectModal({
                             ),
                           options: [
                             { label: "Read", value: "read" },
-                            { label: "Read & Write", value: "read_write" },
+                            { label: "Read & Write", value: "read-write" },
                           ],
                         },
                       ]}
@@ -669,9 +713,8 @@ export default function CreateProjectModal({
           onClick={() => resetForm()}
         />
         <Button
-          disabled={!projectName || isLoading}
-          loading={isLoading}
-          title={isLoading ? "Creating project..." : "Create"}
+          disabled={!projectName || !!projectNameError || !!descriptionError}
+          title="Create"
           onClick={createProjectHandler}
         />
       </div>

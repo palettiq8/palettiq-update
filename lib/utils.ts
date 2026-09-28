@@ -1,4 +1,4 @@
-import { User, UserRole } from "@/utils/types";
+import { Project, User, UserRole } from "@/utils/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -31,5 +31,18 @@ export function mapUserProfile(row: {
     role: row.role,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+export function mapProjectRow(row: any): Project {
+  return {
+    id: row.id,
+    adminId: row.admin_id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description,
+    metadata: row.metadata,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
   };
 }

@@ -65,14 +65,13 @@ export interface Project {
   name: string;
   slug: string;
   description?: string;
-  versions: string[];
-  members: ProjectMember[];
   metadata: {
-    industry?: string;
     status: ProjectStatus;
+    industry?: string;
     visibility: ProjectVisibility;
     thumbnailUrl?: string;
   };
   createdAt: Date;
   updatedAt: Date;
+  pending?: boolean;
 }
