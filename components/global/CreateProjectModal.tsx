@@ -17,7 +17,10 @@ import {
 import { toast } from "@/lib/toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import { mapProjectRow } from "@/lib/utils";
-import { PROJECT_DESCRIPTION_MAX_LENGTH, PROJECT_NAME_MAX_LENGTH } from "@/utils/constants";
+import {
+  PROJECT_DESCRIPTION_MAX_LENGTH,
+  PROJECT_NAME_MAX_LENGTH,
+} from "@/utils/constants";
 
 interface CreateProjectModalProps {
   isOpen: boolean;
@@ -71,7 +74,7 @@ export default function CreateProjectModal({
   onClose,
   onOptimisticCreate,
   onCreateSuccess,
-  onCreateError
+  onCreateError,
 }: CreateProjectModalProps) {
   const [projectName, setProjectName] = useState("");
   const [projectNameError, setProjectNameError] = useState("");
@@ -107,8 +110,8 @@ export default function CreateProjectModal({
     industry.trim() === "" || isOtherSelected
       ? INDUSTRY_OPTIONS
       : INDUSTRY_OPTIONS.filter((item) =>
-        item.toLowerCase().includes(industry.toLowerCase()),
-      );
+          item.toLowerCase().includes(industry.toLowerCase()),
+        );
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -411,7 +414,9 @@ export default function CreateProjectModal({
               ${descriptionError ? "border-red-300 focus:ring-red-300 focus:border-red-300" : "border-zinc-200 dark:border-zinc-700"}`}
             placeholder="What is this project for?"
             aria-invalid={!!descriptionError}
-            aria-describedby={descriptionError ? "project-description-error" : undefined}
+            aria-describedby={
+              descriptionError ? "project-description-error" : undefined
+            }
           ></textarea>
           {descriptionError && (
             <span
@@ -440,10 +445,11 @@ export default function CreateProjectModal({
                   key={option.value}
                   type="button"
                   onClick={() => setVisibility(option.value)}
-                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer ${isSelected
-                    ? "bg-zinc-900 text-white shadow-sm dark:bg-zinc-50 dark:text-zinc-900"
-                    : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                    }`}
+                  className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
+                    isSelected
+                      ? "bg-zinc-900 text-white shadow-sm dark:bg-zinc-50 dark:text-zinc-900"
+                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  }`}
                 >
                   <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
                   {option.label}
@@ -474,10 +480,11 @@ export default function CreateProjectModal({
                   className="flex items-center gap-2 text-left cursor-pointer"
                 >
                   <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors duration-150 ${isSelected
-                      ? "bg-zinc-900 border-zinc-900 dark:bg-zinc-50 dark:border-zinc-50"
-                      : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950"
-                      }`}
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors duration-150 ${
+                      isSelected
+                        ? "bg-zinc-900 border-zinc-900 dark:bg-zinc-50 dark:border-zinc-50"
+                        : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950"
+                    }`}
                   >
                     {isSelected && (
                       <Check
@@ -546,10 +553,11 @@ export default function CreateProjectModal({
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => selectIndustry(item)}
                     onMouseEnter={() => setHighlightedIndex(index)}
-                    className={`w-full text-left rounded-md px-3 py-2 text-sm font-medium transition-colors duration-100 cursor-pointer ${index === highlightedIndex
-                      ? "bg-zinc-200/70 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                      : "text-zinc-900 dark:text-zinc-50"
-                      }`}
+                    className={`w-full text-left rounded-md px-3 py-2 text-sm font-medium transition-colors duration-100 cursor-pointer ${
+                      index === highlightedIndex
+                        ? "bg-zinc-200/70 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                        : "text-zinc-900 dark:text-zinc-50"
+                    }`}
                   >
                     {item}
                   </button>
@@ -617,10 +625,11 @@ export default function CreateProjectModal({
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => selectMember(user)}
                     onMouseEnter={() => setInviteHighlightedIndex(index)}
-                    className={`w-full flex flex-col text-left rounded-md px-3 py-2 text-sm transition-colors duration-100 cursor-pointer ${index === inviteHighlightedIndex
-                      ? "bg-zinc-200/70 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-50"
-                      : "text-zinc-700 dark:text-zinc-300"
-                      }`}
+                    className={`w-full flex flex-col text-left rounded-md px-3 py-2 text-sm transition-colors duration-100 cursor-pointer ${
+                      index === inviteHighlightedIndex
+                        ? "bg-zinc-200/70 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-50"
+                        : "text-zinc-700 dark:text-zinc-300"
+                    }`}
                   >
                     <span className="font-medium">
                       {user.name || user.username}

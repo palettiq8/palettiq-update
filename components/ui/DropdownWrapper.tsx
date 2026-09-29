@@ -98,6 +98,13 @@ export default function DropdownWrapper({
   }, [coords]);
 
   useLayoutEffect(() => {
+    if (!open || !ready) return;
+    const el =
+      contentRef.current?.querySelector<HTMLElement>("[data-autofocus]");
+    el?.focus({ preventScroll: true });
+  }, [open, ready]);
+
+  useLayoutEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
         triggerRef.current &&

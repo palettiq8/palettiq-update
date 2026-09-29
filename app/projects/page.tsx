@@ -3,7 +3,18 @@
 import { Button } from "@/components/ui/Button";
 import DropdownMenu from "@/components/ui/DropdownMenu";
 import IconButtonGroup from "@/components/ui/IconButtonGroup";
-import { ChevronDown, FolderOpen, LayoutGrid, List, Plus, Search, MoreHorizontal } from "lucide-react";
+import {
+  ChevronDown,
+  FolderOpen,
+  LayoutGrid,
+  List,
+  Plus,
+  Search,
+  MoreHorizontal,
+  Settings,
+  Trash,
+  Share,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CreateProjectModal from "@/components/global/CreateProjectModal";
 import EmptyState from "@/components/ui/EmptyState";
@@ -13,9 +24,11 @@ import { Spinner } from "@/components/ui/Spinner";
 import { mapProjectRow } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
-  draft: "bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400",
+  draft:
+    "bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400",
   running: "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400",
-  completed: "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
+  completed:
+    "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
   archived: "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400",
 };
 
@@ -190,8 +203,9 @@ export default function page() {
               {filteredProjects.map((project) => (
                 <div
                   key={project.id}
-                  className={`flex flex-col gap-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150 cursor-pointer ${project.pending ? "opacity-60" : ""
-                    }`}
+                  className={`flex flex-col gap-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-4 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150 cursor-pointer ${
+                    project.pending ? "opacity-60" : ""
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate flex items-center gap-2 min-w-0">
@@ -200,9 +214,41 @@ export default function page() {
                       )}
                       <span className="truncate">{project.name}</span>
                     </h3>
-                    <button className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors duration-150 cursor-pointer shrink-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
+                    <DropdownMenu
+                      trigger={
+                        <Button
+                          icon={MoreHorizontal}
+                          variant="outline"
+                          size="sm"
+                        />
+                      }
+                      sections={[
+                        {
+                          items: [
+                            {
+                              label: "Share",
+                              icon: Share,
+                              onClick: () => {},
+                            },
+                            {
+                              label: "Settings",
+                              icon: Settings,
+                              onClick: () => {},
+                            },
+                          ],
+                        },
+                        {
+                          items: [
+                            {
+                              label: "Delete",
+                              icon: Trash,
+                              variant: "destructive",
+                              onClick: () => {},
+                            },
+                          ],
+                        },
+                      ]}
+                    />
                   </div>
                   {project.description && (
                     <p className="text-xs font-medium text-zinc-900 dark:text-zinc-50 line-clamp-2">
@@ -211,8 +257,9 @@ export default function page() {
                   )}
                   <div className="flex items-center justify-between mt-1">
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium capitalize ${STATUS_STYLES[project.metadata?.status ?? ""]
-                        }`}
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium capitalize ${
+                        STATUS_STYLES[project.metadata?.status ?? ""]
+                      }`}
                     >
                       {project.metadata?.status}
                     </span>
@@ -249,8 +296,9 @@ export default function page() {
                   {filteredProjects.map((project) => (
                     <tr
                       key={project.id}
-                      className={`bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 last:border-b-0 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150 ${project.pending ? "opacity-60" : ""
-                        }`}
+                      className={`bg-white dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 last:border-b-0 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors duration-150 ${
+                        project.pending ? "opacity-60" : ""
+                      }`}
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2 min-w-0">
@@ -269,8 +317,9 @@ export default function page() {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium capitalize ${STATUS_STYLES[project.metadata?.status ?? ""]
-                            }`}
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium capitalize ${
+                            STATUS_STYLES[project.metadata?.status ?? ""]
+                          }`}
                         >
                           {project.metadata?.status}
                         </span>
@@ -281,10 +330,40 @@ export default function page() {
                           : "—"}
                       </td>
                       <td className="px-4 py-3">
-                        <Button
-                          icon={MoreHorizontal}
-                          variant="outline"
-                          size="sm"
+                        <DropdownMenu
+                          trigger={
+                            <Button
+                              icon={MoreHorizontal}
+                              variant="outline"
+                              size="sm"
+                            />
+                          }
+                          sections={[
+                            {
+                              items: [
+                                {
+                                  label: "Share",
+                                  icon: Share,
+                                  onClick: () => {},
+                                },
+                                {
+                                  label: "Settings",
+                                  icon: Settings,
+                                  onClick: () => {},
+                                },
+                              ],
+                            },
+                            {
+                              items: [
+                                {
+                                  label: "Delete",
+                                  icon: Trash,
+                                  variant: "destructive",
+                                  onClick: () => {},
+                                },
+                              ],
+                            },
+                          ]}
                         />
                       </td>
                     </tr>
