@@ -146,6 +146,7 @@ export default function page() {
                 title="Status"
                 iconPosition="right"
                 variant={"outline"}
+                className="data-[state=open]:bg-zinc-200/50 dark:data-[state=open]:bg-zinc-700/70"
               />
             }
             sections={[
@@ -220,6 +221,7 @@ export default function page() {
                           icon={MoreHorizontal}
                           variant="outline"
                           size="sm"
+                          className="data-[state=open]:bg-zinc-200/50 dark:data-[state=open]:bg-zinc-700/70"
                         />
                       }
                       sections={[
@@ -336,6 +338,7 @@ export default function page() {
                               icon={MoreHorizontal}
                               variant="outline"
                               size="sm"
+                              className="data-[state=open]:bg-zinc-200/50 dark:data-[state=open]:bg-zinc-700/70"
                             />
                           }
                           sections={[

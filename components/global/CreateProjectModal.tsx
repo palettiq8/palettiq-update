@@ -683,6 +683,7 @@ export default function CreateProjectModal({
                           iconPosition="right"
                           variant={"outline"}
                           size={"sm"}
+                          className="data-[state=open]:bg-zinc-200/50 dark:data-[state=open]:bg-zinc-700/70"
                         />
                       }
                       sections={[
