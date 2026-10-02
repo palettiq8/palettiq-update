@@ -22,6 +22,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Project } from "@/utils/types";
 import { Spinner } from "@/components/ui/Spinner";
 import { mapProjectRow } from "@/lib/utils";
+import { useProjectState } from "@/store/useProjectStore";
 
 const STATUS_STYLES: Record<string, string> = {
   draft:
@@ -38,10 +39,10 @@ export default function page() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { isModalOpen, setIsModalOpen } = useProjectState();
 
   const supabase = useMemo(() => createClient(), []);
 

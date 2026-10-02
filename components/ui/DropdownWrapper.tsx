@@ -55,7 +55,6 @@ interface DropdownWrapperProps {
   children?: React.ReactNode;
   className?: string;
 }
-
 export default function DropdownWrapper({
   trigger,
   children,

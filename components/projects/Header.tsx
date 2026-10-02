@@ -31,6 +31,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { createClient } from "@/utils/supabase/client";
 import { mapProjectRow } from "@/lib/utils";
 import type { AuthUser, Project } from "@/utils/types";
+import { useProjectState } from "@/store/useProjectStore";
 
 function getInitials(name: string) {
   return name
@@ -74,6 +75,8 @@ export default function Header({ user }: { user: AuthUser }) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [projectQuery, setProjectQuery] = useState("");
+
+  const { isModalOpen, setIsModalOpen } = useProjectState();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -201,6 +204,9 @@ export default function Header({ user }: { user: AuthUser }) {
                 title="Create Project"
                 icon={Plus}
                 variant={"ghost"}
+                onClick={() => {
+                  setIsModalOpen()
+                }}
                 className="flex items-center gap-2 justify-start w-full px-1.5"
               />
             </div>
